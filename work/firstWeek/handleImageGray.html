@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>图片灰度处理</title>
+</head>
+<body>
+  <div class="page-container">
+    <input type="file" id="imageFileUpload" accept="image/*">
+    <canvas id="canvas"></canvas>
+    <img class="handler-img-result" src="" style="display: none;">
+  </div>
+  <script>
+    (function(window) {
+      const canvas = document.getElementById('canvas');
+      let imgEle = document.getElementsByClassName('handler-img-result')[0];
+      let fileImage = document.getElementById('imageFileUpload')
+      let contCtx = canvas.getContext('2d')
+      let pageContainer = {
+        selectImgSrc: '',
+        canvasVisible: false,
+        init: function() {
+          this.eventInit()
+        },
+        eventInit: function() {
+          const that = this;
+
+          fileImage.addEventListener('change', function(e) {
+            let imgFile = e.target.files[0]
+            this.value = ''
+            let reader = new FileReader()
+            reader.readAsDataURL(imgFile)
+            reader.onload = function(e) {
+              let imgUrl = this.result;
+              let img = new Image()
+              img.src = imgUrl
+              img.onload = function() {
+
+                let width = this.width
+                let height = this.height
+                if (width > 400) {
+                  const multiple = parseFloat((width / 400)).toFixed(2)
+                  width = 400
+                  height = parseInt(height / multiple)
+                }
+
+                imgEle.setAttribute('src', imgUrl)
+                imgEle.width = width
+                imgEle.height = height
+                imgEle.style.display = "block"
+
+                canvas.width = width
+                canvas.height = height
+                contCtx.drawImage(imgEle, 0, 0, width, height)
+
+                that.canvasVisible = true
+
+                let pixels = contCtx.getImageData(0, 0, width, height)
+                let pixelData = pixels.data
+                let len = pixelData.length
+                for (let i = 0; i < len; i += 4) {
+                  let gray = (pixelData[i] + pixelData[i + 2] + pixelData[i + 4]) / 3;
+                  pixelData[i] = pixelData[i + 1] = pixelData[i + 2] = gray;
+                }
+                contCtx.putImageData(pixels, 0, 0)
+              }
+            }
+          })
+          canvas.addEventListener('click', function() {
+            if (!that.canvasVisible)  return;
+            const _url = canvas.toDataURL('image/jpeg')
+            try {
+              let elemA = document.createElement('a')
+              elemA.download = ''
+              elemA.href = _url
+              document.body.appendChild(elemA);
+              elemA.click()
+              elemA.remove()
+            } catch (e) {
+              throw Error(e)
+            }
+          })
+
+        },
+      }
+      pageContainer.init()
+    })(window)
+  </script>
+</body>
+</html>
