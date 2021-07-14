@@ -1,5 +1,5 @@
 
-function float10To64(v) {
+;function float10To64(v) {
   if (typeof v !== 'number' || v === Infinity || v === -Infinity || Number.isNaN(v)) {
     return
   }

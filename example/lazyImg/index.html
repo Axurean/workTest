@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>图片懒加载</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+    .page-container {
+      max-width: 300px;
+      margin: 0 auto;
+    }
+    .img-list-container {
+      width: 100%;
+      height: 400px;
+      overflow-y: auto;
+      margin-top: 200px;
+    }
+    .img-list-container img {
+      width: 100%;
+      height: 200px;
+      text-align: center;
+      line-height: 1;
+    }
+    .img-list-container img.img-lazy {
+      background-image: url('../../images/loading.gif');
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-size: 100% 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-container">
+    <div class="img-list-container">
+      <img src="../../images/loading.gif" data-src="../../images/1.png" class="img-item">
+      <img src="../../images/loading.gif" data-src="../../images/2.png" class="img-item">
+      <img src="../../images/loading.gif" data-src="../../images/3.png" class="img-item">
+      <img src="../../images/loading.gif" data-src="../../images/4.png" class="img-item">
+    </div>
+  </div>
+  <script src="../../tools/index.js"></script>
+  <script>
+    (function(window) {
+      const doc = document
+      const imgEle = doc.querySelectorAll('.img-item')
+      const containerEle = doc.querySelector('.img-list-container')
+      const defaultImgUrl = '../../images/loading.gif'
+      const lazyImg = {
+        init: function() {
+          if ('IntersectionObserver' in window) {
+            this.intersection()
+          } else {
+            this.eleScroll()
+            this.view()
+          }
+        },
+        intersection: function() {
+          const lazyImageObserver = new IntersectionObserver(function(entries, observer) {
+            entries.forEach(function(item, index) {
+              let lazyImage = item.target;
+              if (item.intersectionRatio > 0) {
+                lazyImage.src = lazyImage.dataset.src
+                lazyImageObserver.unobserve(lazyImage)
+              } else {
+                lazyImage.src = defaultImgUrl
+              }
+            })
+          })
+          imgEle.forEach(function(lazyImage) {     
+            lazyImageObserver.observe(lazyImage);        
+          })
+        },
+        view: function() {
+          let imgEleList = Array.prototype.slice.call(imgEle)
+          let len = imgEleList.length
+          for(let i = 0; i < len; i++) {
+            let imageElement = imgEleList[i]
+            const rect = imageElement.getBoundingClientRect()
+            if(rect.bottom >= 0 && rect.top < doc.body.clientHeight) {
+              imageElement.src = imageElement.dataset.src
+            }
+          }
+        },
+        eleScroll: function() {
+          containerEle.addEventListener('scroll', Tools.throttle.call(this, this.view, 300))
+        }
+      }
+      lazyImg.init()
+    })(window)
+  </script>
+</body>
+</html>
