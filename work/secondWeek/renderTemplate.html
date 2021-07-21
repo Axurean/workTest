@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>模板渲染</title>
+</head>
+<body>
+  <div id = "app">
+
+  </div>
+  <script type="text/html" id="listTemplate">
+    <div class="newslist">
+      <div class="img" v-if="info.showImage"><img src="{{image}}"/></div>
+      <div class="date" v-if="info.showDate">{{info.name}}</div>
+      <div class="img">{{info.name}}</div>
+    </div>
+  </script>
+  <script src = "../../renderTpl/vNode.js"></script>
+  <script src = "../../renderTpl/index.js"></script>
+  <script src="../../tools/index.js"></script>
+  <script>
+    (function() {
+      const parentEle = document.getElementById('app');
+      const tpl = document.getElementById('listTemplate')
+      const data = {
+        image: "../../images/1.png",
+        info: {showImage: true, showDate: false, name: "aaa"}
+      }
+      $renderTem.mounted(parentEle, data, tpl.innerHTML)
+    })()
+  </script>
+</body>
+</html>
